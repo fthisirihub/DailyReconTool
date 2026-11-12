@@ -1,0 +1,7 @@
+{
+  "gemini_api_key": "YOUR_GEMINI_API_KEY",
+  "service_account_path": "credentials.json",
+  "tracker_sheet_id": "1xyzMasterDailyInventoryTrackerSheetID",
+  "closing_sheet_id": "1xyzClosingStockSheetID",
+  "default_tab": "10-11"
+}

@@ -1,0 +1,6 @@
+{
+  "name": "Fish & Meat Stock Reconciliation & Profit Tracker",
+  "description": "Stock reconciliation, POS sales sync, FreshToHome invoice parser, and profit margin tracker with Python CustomTkinter desktop app generator.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
