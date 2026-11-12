@@ -280,6 +280,78 @@ export default function App() {
     setTimeout(() => setClosingNotification(null), 4000);
   };
 
+  // ---------------- DOWNLOAD PREVIEW HANDLERS (Excel .xlsx / CSV) ----------------
+  const handleDownloadMod1Preview = (format: 'xlsx' | 'csv' = 'xlsx') => {
+    if (stagedInvoiceItems.length === 0) return;
+    const rows = stagedInvoiceItems.map((item, idx) => ({
+      'SL NO': idx + 1,
+      'Invoice Item Description': item.description,
+      'HSN': item.hsn,
+      'Unit Price (₹)': item.unitPrice,
+      'Qty / Weight': item.qty,
+      'UOM': item.uom,
+      'Subtotal (₹)': item.subtotal,
+      'Mapped Tracker Item': item.mappedMasterName,
+      'Target Tab': `Tab "${selectedDay}"`,
+      'Target Column': deliveryPeriod === 'Morning' ? 'Col G (Morning)' : 'Col H (Afternoon)',
+      'Invoice No': invoiceMeta?.invoiceNo || '',
+      'Invoice Date': invoiceMeta?.date || selectedDateIso
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, `Day_${selectedDay}_Inward`);
+    const fileName = `FreshToHome_Day_${selectedDay}_${deliveryPeriod}_Preview.${format}`;
+    XLSX.writeFile(wb, fileName, { bookType: format });
+  };
+
+  const handleDownloadMod2Preview = (format: 'xlsx' | 'csv' = 'xlsx') => {
+    if (stagedPosSales.length === 0) return;
+    const rows = stagedPosSales.map((item, idx) => ({
+      'SL NO': idx + 1,
+      'Approval Status': item.approved ? 'Approved' : 'Pending',
+      'POS SKU': item.sku,
+      'POS Product Description': item.posName,
+      'Category': item.category,
+      'Sales Qty / Kgs': item.quantitySold,
+      'Revenue (₹)': item.totalPrice,
+      'Mapped Tracker Item': item.mappedMasterName,
+      'Target Tab': `Tab "${selectedDay}"`,
+      'Target Column': 'Col K (Total Sales)',
+      'Date': selectedDateIso
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, `Day_${selectedDay}_Sales`);
+    const fileName = `POS_Sales_Day_${selectedDay}_Preview.${format}`;
+    XLSX.writeFile(wb, fileName, { bookType: format });
+  };
+
+  const handleDownloadMod3Preview = (format: 'xlsx' | 'csv' = 'xlsx') => {
+    const entries = Object.entries(stagedClosingMap);
+    if (entries.length === 0) return;
+    const rows = entries.map(([name, count], idx) => {
+      const target = currentDayItems.find(m => m.name.toLowerCase() === name.toLowerCase());
+      return {
+        'SL NO': idx + 1,
+        'Item Name (Closing File)': name,
+        'Physical Closing Count': count,
+        'Current Tracker Closing Stock': target ? target.closingStock : 0,
+        'UOM': target ? target.uom : 'Kgs',
+        'Target Tab': `Tab "${selectedDay}"`,
+        'Target Column': 'Col L (Closing Stock)',
+        'Date': selectedDateIso
+      };
+    });
+
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, `Day_${selectedDay}_Closing`);
+    const fileName = `Closing_Stock_Day_${selectedDay}_Preview.${format}`;
+    XLSX.writeFile(wb, fileName, { bookType: format });
+  };
+
   // ---------------- MASTER CLEAR FOR THE DAY ----------------
   // Clears all data for the day: resets Master Tracker table numbers and wipes all 3 preview modules
   const handleMasterClearDay = () => {
@@ -1407,12 +1479,35 @@ export default function App() {
                     </div>
 
                     {stagedInvoiceItems.length > 0 && (
-                      <button
-                        onClick={handleClearMod1Preview}
-                        className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-medium transition-colors shrink-0"
-                      >
-                        <span>🧹 Clear Preview Data</span>
-                      </button>
+                      <div className="flex items-center space-x-2 shrink-0">
+                        {/* Download Preview Button (Excel / CSV) */}
+                        <div className="flex items-center rounded-lg bg-emerald-500/15 border border-emerald-500/30 overflow-hidden shadow-sm">
+                          <button
+                            onClick={() => handleDownloadMod1Preview('xlsx')}
+                            title="Download preview data as Excel (.xlsx)"
+                            className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/25 transition-colors"
+                          >
+                            <Download className="w-3.5 h-3.5 text-emerald-400" />
+                            <span>Download</span>
+                            <span className="text-[10px] text-emerald-400/80 font-mono font-normal">(.xlsx)</span>
+                          </button>
+                          <div className="w-[1px] h-4 bg-emerald-500/30"></div>
+                          <button
+                            onClick={() => handleDownloadMod1Preview('csv')}
+                            title="Download preview data as CSV (.csv)"
+                            className="px-2.5 py-1.5 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/25 transition-colors"
+                          >
+                            CSV
+                          </button>
+                        </div>
+
+                        <button
+                          onClick={handleClearMod1Preview}
+                          className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-medium transition-colors shrink-0"
+                        >
+                          <span>🧹 Clear Preview Data</span>
+                        </button>
+                      </div>
                     )}
                   </div>
 
@@ -1645,12 +1740,35 @@ export default function App() {
                     </div>
 
                     {stagedPosSales.length > 0 && (
-                      <button
-                        onClick={handleClearMod2Preview}
-                        className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-medium transition-colors shrink-0"
-                      >
-                        <span>🧹 Clear Preview Data</span>
-                      </button>
+                      <div className="flex items-center space-x-2 shrink-0">
+                        {/* Download Preview Button (Excel / CSV) */}
+                        <div className="flex items-center rounded-lg bg-blue-500/15 border border-blue-500/30 overflow-hidden shadow-sm">
+                          <button
+                            onClick={() => handleDownloadMod2Preview('xlsx')}
+                            title="Download preview sales data as Excel (.xlsx)"
+                            className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold text-blue-300 hover:bg-blue-500/25 transition-colors"
+                          >
+                            <Download className="w-3.5 h-3.5 text-blue-400" />
+                            <span>Download</span>
+                            <span className="text-[10px] text-blue-400/80 font-mono font-normal">(.xlsx)</span>
+                          </button>
+                          <div className="w-[1px] h-4 bg-blue-500/30"></div>
+                          <button
+                            onClick={() => handleDownloadMod2Preview('csv')}
+                            title="Download preview sales data as CSV (.csv)"
+                            className="px-2.5 py-1.5 text-xs font-semibold text-blue-300 hover:bg-blue-500/25 transition-colors"
+                          >
+                            CSV
+                          </button>
+                        </div>
+
+                        <button
+                          onClick={handleClearMod2Preview}
+                          className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-medium transition-colors shrink-0"
+                        >
+                          <span>🧹 Clear Preview Data</span>
+                        </button>
+                      </div>
                     )}
                   </div>
 
@@ -1897,12 +2015,35 @@ export default function App() {
                     </div>
 
                     {Object.keys(stagedClosingMap).length > 0 && (
-                      <button
-                        onClick={handleClearMod3Preview}
-                        className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-medium transition-colors shrink-0"
-                      >
-                        <span>🧹 Clear Preview Data</span>
-                      </button>
+                      <div className="flex items-center space-x-2 shrink-0">
+                        {/* Download Preview Button (Excel / CSV) */}
+                        <div className="flex items-center rounded-lg bg-indigo-500/15 border border-indigo-500/30 overflow-hidden shadow-sm">
+                          <button
+                            onClick={() => handleDownloadMod3Preview('xlsx')}
+                            title="Download closing stock preview as Excel (.xlsx)"
+                            className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold text-indigo-300 hover:bg-indigo-500/25 transition-colors"
+                          >
+                            <Download className="w-3.5 h-3.5 text-indigo-400" />
+                            <span>Download</span>
+                            <span className="text-[10px] text-indigo-400/80 font-mono font-normal">(.xlsx)</span>
+                          </button>
+                          <div className="w-[1px] h-4 bg-indigo-500/30"></div>
+                          <button
+                            onClick={() => handleDownloadMod3Preview('csv')}
+                            title="Download closing stock preview as CSV (.csv)"
+                            className="px-2.5 py-1.5 text-xs font-semibold text-indigo-300 hover:bg-indigo-500/25 transition-colors"
+                          >
+                            CSV
+                          </button>
+                        </div>
+
+                        <button
+                          onClick={handleClearMod3Preview}
+                          className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-medium transition-colors shrink-0"
+                        >
+                          <span>🧹 Clear Preview Data</span>
+                        </button>
+                      </div>
                     )}
                   </div>
 
