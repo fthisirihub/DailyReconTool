@@ -116,36 +116,40 @@ function doPost(e) {
 }`;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-      <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-150">
-        <div className="p-5 border-b border-slate-800 flex items-center justify-between bg-slate-950/70">
-          <div className="flex items-center space-x-2.5">
-            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center border border-emerald-500/20">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/75 backdrop-blur-sm p-0 sm:p-4 safe-pb">
+      <div className="bg-slate-900 border border-slate-700 rounded-t-2xl sm:rounded-2xl w-full max-w-xl max-h-[92dvh] flex flex-col overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+        <div className="p-4 sm:p-5 border-b border-slate-800 flex items-center justify-between bg-slate-950/70 shrink-0">
+          <div className="flex items-center space-x-2.5 min-w-0 pr-2">
+            <div className="w-9 h-9 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center border border-emerald-500/20 shrink-0">
               <KeyRound className="w-4 h-4" />
             </div>
-            <div>
-              <h3 className="text-sm font-bold text-white">Google Sheets Real-Time Connection</h3>
-              <p className="text-[11px] text-slate-400">Target: Tab "{targetTab}" in Spreadsheet ID {targetSheetId.slice(0, 15)}...</p>
+            <div className="min-w-0">
+              <h3 className="text-sm font-bold text-white truncate">Google Sheets Real-Time Connection</h3>
+              <p className="text-xs text-slate-400 truncate">Target: Tab "{targetTab}" in ID {targetSheetId.slice(0, 15)}...</p>
             </div>
           </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800">
-            <X className="w-4 h-4" />
+          <button
+            onClick={onClose}
+            aria-label="Close modal"
+            className="text-slate-400 hover:text-white min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-slate-800 shrink-0"
+          >
+            <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="p-6 space-y-4">
+        <div className="p-4 sm:p-6 space-y-4 overflow-y-auto flex-1">
           {pendingPushDescription && (
-            <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-300 flex items-center justify-between">
+            <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-300 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <span>{pendingPushDescription}</span>
-              <span className="font-mono font-bold bg-emerald-500/20 px-2 py-0.5 rounded text-[11px]">Tab "{targetTab}"</span>
+              <span className="font-mono font-bold bg-emerald-500/20 px-2.5 py-1 rounded text-[11px] self-start sm:self-auto shrink-0">Tab "{targetTab}"</span>
             </div>
           )}
 
           {/* Mode Switcher */}
-          <div className="flex bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs">
+          <div className="flex flex-col sm:flex-row bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs gap-1">
             <button
               onClick={() => setActiveMode('token')}
-              className={`flex-1 py-1.5 rounded-lg font-medium transition-colors ${
+              className={`flex-1 min-h-[44px] px-3 py-2 rounded-lg font-medium transition-colors ${
                 activeMode === 'token' ? 'bg-emerald-500 text-white shadow-sm' : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -153,7 +157,7 @@ function doPost(e) {
             </button>
             <button
               onClick={() => setActiveMode('apps_script')}
-              className={`flex-1 py-1.5 rounded-lg font-medium transition-colors ${
+              className={`flex-1 min-h-[44px] px-3 py-2 rounded-lg font-medium transition-colors ${
                 activeMode === 'apps_script' ? 'bg-emerald-500 text-white shadow-sm' : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -164,7 +168,7 @@ function doPost(e) {
           {activeMode === 'token' ? (
             <div className="space-y-3">
               <div>
-                <label className="text-xs font-semibold text-slate-300 block mb-1">
+                <label className="text-xs font-semibold text-slate-300 block mb-1.5">
                   Google OAuth Bearer Token:
                 </label>
                 <input
@@ -172,17 +176,17 @@ function doPost(e) {
                   value={tokenInput}
                   onChange={e => setTokenInput(e.target.value)}
                   placeholder="ya29.a0Ac..."
-                  className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-emerald-500"
+                  className="w-full min-h-[44px] bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-base lg:text-xs font-mono text-white focus:outline-none focus:border-emerald-500"
                 />
-                <p className="text-[11px] text-slate-400 mt-1.5 leading-relaxed">
+                <p className="text-xs text-slate-400 mt-1.5 leading-relaxed">
                   Enter your Google OAuth token with <code className="text-emerald-400">spreadsheets</code> scope. You can obtain a temporary token from Google OAuth Playground or your Google Cloud service credentials.
                 </p>
               </div>
 
               <div className="p-3 rounded-lg bg-slate-950/80 border border-slate-800 text-xs text-slate-400 space-y-1">
                 <div className="text-slate-300 font-semibold flex items-center gap-1.5">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                  Formula &amp; Column Protection:
+                  <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>Formula &amp; Column Protection:</span>
                 </div>
                 <div>Targeted cells update strictly Column G, H, K, or L for matching item names. Existing formulas in Col J (Inventory) and Col M (Shrinkage) are 100% untouched.</div>
               </div>
@@ -190,7 +194,7 @@ function doPost(e) {
           ) : (
             <div className="space-y-3">
               <div>
-                <label className="text-xs font-semibold text-slate-300 block mb-1">
+                <label className="text-xs font-semibold text-slate-300 block mb-1.5">
                   Google Apps Script Web App URL:
                 </label>
                 <input
@@ -198,12 +202,12 @@ function doPost(e) {
                   value={webhookInput}
                   onChange={e => setWebhookInput(e.target.value)}
                   placeholder="https://script.google.com/macros/s/AKfycbx.../exec"
-                  className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-emerald-500"
+                  className="w-full min-h-[44px] bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-base lg:text-xs font-mono text-white focus:outline-none focus:border-emerald-500"
                 />
               </div>
 
               <div className="bg-slate-950 p-3 rounded-lg border border-slate-800 space-y-2">
-                <div className="flex items-center justify-between text-xs">
+                <div className="flex items-center justify-between gap-2 text-xs">
                   <span className="font-semibold text-slate-300">Quick Apps Script for your Sheet:</span>
                   <button
                     onClick={() => {
@@ -211,13 +215,13 @@ function doPost(e) {
                       setCopiedScript(true);
                       setTimeout(() => setCopiedScript(false), 2000);
                     }}
-                    className="flex items-center space-x-1 text-emerald-400 hover:text-emerald-300 text-[11px]"
+                    className="flex items-center space-x-1.5 min-h-[44px] px-2.5 text-emerald-400 hover:text-emerald-300 text-xs font-semibold shrink-0"
                   >
-                    {copiedScript ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                    {copiedScript ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                     <span>{copiedScript ? 'Copied Script!' : 'Copy Script'}</span>
                   </button>
                 </div>
-                <p className="text-[11px] text-slate-400">
+                <p className="text-xs text-slate-400 leading-relaxed">
                   In your Google Sheet, open <b>Extensions &gt; Apps Script</b>, paste this script, click <b>Deploy &gt; New deployment &gt; Web app (Anyone)</b>, and paste the URL above.
                 </p>
               </div>
@@ -225,31 +229,31 @@ function doPost(e) {
           )}
 
           {testStatus && (
-            <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800 text-xs font-mono">
+            <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 text-xs font-mono break-words">
               {testStatus}
             </div>
           )}
         </div>
 
-        <div className="p-4 bg-slate-950 border-t border-slate-800 flex items-center justify-between">
+        <div className="p-4 bg-slate-950 border-t border-slate-800 flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-2.5 shrink-0">
           <button
             onClick={handleTestConnection}
             disabled={isTesting}
-            className="px-3.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-medium transition-colors"
+            className="w-full sm:w-auto min-h-[44px] px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-medium transition-colors"
           >
             {isTesting ? 'Testing...' : 'Test Connection'}
           </button>
 
-          <div className="flex items-center space-x-2">
+          <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center gap-2">
             <button
               onClick={onClose}
-              className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition-colors"
+              className="w-full sm:w-auto min-h-[44px] px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition-colors"
             >
               Cancel
             </button>
             <button
               onClick={handleSaveAndPush}
-              className="px-5 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-lg shadow-emerald-500/20 transition-all flex items-center space-x-1.5"
+              className="w-full sm:w-auto min-h-[44px] px-5 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center space-x-1.5"
             >
               <Zap className="w-3.5 h-3.5" />
               <span>Save &amp; Push to Tab "{targetTab}"</span>
